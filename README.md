@@ -1,3 +1,5 @@
-# app
+# Live Facial Detection
+This repo is based off of another repo: https://github.com/GabriellArthur/Flutter-Live-Face-Detection
+All the facial recognition implementation credit is due to the Author of this repo
 
-![image](https://user-images.githubusercontent.com/71986202/195708241-e3b3863f-cc89-4e43-8abd-8da51f4bf210.png)
+I am taking it further to do some testing on a validation process to determine if the face is being scanned is a actual face
