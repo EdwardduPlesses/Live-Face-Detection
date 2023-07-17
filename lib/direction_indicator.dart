@@ -39,9 +39,14 @@ class DirectionPainter extends CustomPainter {
       final startAngle = 2 * i * pi / directions.length;
       final sweepAngle = 2 * pi / directions.length;
 
-      paint.color = directions[i].hasLooked
-          ? Colors.green
-          : const Color.fromARGB(255, 250, 250, 250);
+      paint.color = directions
+                  .firstWhere((direction) => direction.name == 'canStart')
+                  .hasLooked ==
+              true
+          ? directions[i].hasLooked
+              ? Colors.green
+              : const Color.fromARGB(255, 250, 250, 250)
+          : Colors.red;
 
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius),

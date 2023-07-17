@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildIconWidget(final IconData icon) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      padding: const EdgeInsets.symmetric(horizontal: 10.0),
       child: Icon(
         icon,
         size: 24,

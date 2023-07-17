@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'dart:math';
 
 import 'package:app/camera_view.dart';
@@ -20,6 +21,7 @@ class _FaceDetectorPageState extends State<FaceDetectorPage> {
     options: FaceDetectorOptions(
       enableContours: true,
       enableClassification: true,
+      performanceMode: FaceDetectorMode.accurate,
     ),
   );
   bool _canProcess = true;
@@ -27,6 +29,7 @@ class _FaceDetectorPageState extends State<FaceDetectorPage> {
   CustomPaint? _customPaint;
   String? _text;
   List<Direction> directions = [
+    Direction('canStart'),
     Direction('left'),
     Direction('right'),
     Direction('up'),
@@ -74,19 +77,6 @@ class _FaceDetectorPageState extends State<FaceDetectorPage> {
       _customPaint = CustomPaint(painter: painter);
       for (final face in faces) {
         updateDirections(face);
-        // String text = '';
-        // if (face.headEulerAngleY! < -10) {
-        //   text += 'Face is turned to the right\n\n';
-        // } else if (face.headEulerAngleY! > 10) {
-        //   text += 'Face is turned to the left\n\n';
-        // }
-
-        // if (face.headEulerAngleX! < -10) {
-        //   text += 'Face is looking down\n\n';
-        // } else if (face.headEulerAngleX! > 10) {
-        //   text += 'Face is looking up\n\n';
-        // }
-        // _text = text;
       }
     } else {
       String text = 'face found ${faces.length}\n\n';
@@ -101,40 +91,53 @@ class _FaceDetectorPageState extends State<FaceDetectorPage> {
     }
   }
 
-  void updateDirections(Face face) {
+  Future<void> updateDirections(Face face) async {
+    developer.log('Y: ${face.headEulerAngleY}', level: 1000);
+    developer.log('X: ${face.headEulerAngleX}', level: 1200);
+    developer.log('Z: ${face.headEulerAngleZ}', level: 1500);
+
+// Define a threshold for how much the face can deviate from looking straight at the camera
+    double threshold = 10.0;
+
+// Check if the face is looking at the camera
+    if (face.headEulerAngleY!.abs() < threshold &&
+        face.headEulerAngleX!.abs() < threshold) {
+      setHasLooked(Direction('canStart'));
+      checkDirections(face);
+    } else {
+      // The person is not looking at the camera, don't start the tracing process
+      // You might want to display a message to the user asking them to look at the camera
+      setHasLooked(Direction('canStart', hasLooked: false));
+    }
+  }
+
+  void checkDirections(Face face) {
     if (face.headEulerAngleY! < -10) {
-      directions
-          .firstWhere((direction) => direction.name == 'right')
-          .hasLooked = true;
+      setHasLooked(Direction('right'));
     } else if (face.headEulerAngleY! > 10) {
-      directions.firstWhere((direction) => direction.name == 'left').hasLooked =
-          true;
+      setHasLooked(Direction('left'));
     }
 
     if (face.headEulerAngleX! < -10) {
-      directions.firstWhere((direction) => direction.name == 'down').hasLooked =
-          true;
+      setHasLooked(Direction('down'));
     } else if (face.headEulerAngleX! > 10) {
-      directions.firstWhere((direction) => direction.name == 'up').hasLooked =
-          true;
+      setHasLooked(Direction('up'));
     }
 
     if (face.headEulerAngleY! < -10 && face.headEulerAngleX! < -10) {
-      directions
-          .firstWhere((direction) => direction.name == 'down-right')
-          .hasLooked = true;
+      setHasLooked(Direction('down-right'));
     } else if (face.headEulerAngleY! > 10 && face.headEulerAngleX! < -10) {
-      directions
-          .firstWhere((direction) => direction.name == 'down-left')
-          .hasLooked = true;
+      setHasLooked(Direction('down-left'));
     } else if (face.headEulerAngleY! < -10 && face.headEulerAngleX! > 10) {
-      directions
-          .firstWhere((direction) => direction.name == 'up-right')
-          .hasLooked = true;
+      setHasLooked(Direction('up-right'));
     } else if (face.headEulerAngleY! > 10 && face.headEulerAngleX! > 10) {
-      directions
-          .firstWhere((direction) => direction.name == 'up-left')
-          .hasLooked = true;
+      setHasLooked(Direction('up-left'));
     }
+  }
+
+  void setHasLooked(Direction directionIn, {bool hasLooked = true}) {
+    directions
+        .firstWhere((direction) => direction.name == directionIn.name)
+        .hasLooked = hasLooked;
   }
 }
